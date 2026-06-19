@@ -1,0 +1,61 @@
+{
+  "name": "ChronoFlow Codespace",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb"
+  },
+  "forwardPorts": [
+    8080,
+    8081,
+    8082,
+    8083,
+    8084,
+    16686,
+    3000,
+    9090
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "ChronoFlow API Gateway",
+      "onAutoForward": "notify"
+    },
+    "8081": {
+      "label": "Job Service",
+      "onAutoForward": "silent"
+    },
+    "8082": {
+      "label": "Scheduler Service",
+      "onAutoForward": "silent"
+    },
+    "8083": {
+      "label": "Executor Service",
+      "onAutoForward": "silent"
+    },
+    "8084": {
+      "label": "Auth Service",
+      "onAutoForward": "silent"
+    },
+    "16686": {
+      "label": "Jaeger UI",
+      "onAutoForward": "openBrowser"
+    },
+    "3000": {
+      "label": "Grafana",
+      "onAutoForward": "openBrowser"
+    },
+    "9090": {
+      "label": "Prometheus",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "chmod +x scripts/codespaces_start.py scripts/codespaces_stop.py scripts/e2e.py chaos/executor_kill_recovery.py && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}

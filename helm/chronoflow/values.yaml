@@ -1,0 +1,124 @@
+global:
+  imagePullPolicy: IfNotPresent
+  tracingEndpoint: http://otel-collector:4318/v1/traces
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+config:
+  kafkaBootstrapServers: kafka:9092
+  redisHost: redis
+  redisPort: "6379"
+  datasourceUrl: jdbc:postgresql://postgres:5432/chronoflow
+  datasourceUsername: chronoflow
+
+secrets:
+  datasourcePassword: chronoflow
+
+gateway:
+  ingress:
+    enabled: true
+    className: ""
+    host: chronoflow.local
+
+networkPolicy:
+  enabled: true
+
+services:
+  job:
+    enabled: true
+    name: chrono-job-service
+    image: i-ayush-singh/chrono-job-service:latest
+    port: 8081
+    replicas: 1
+    minReplicas: 1
+    maxReplicas: 5
+    cpuTargetUtilization: 70
+    memoryTargetUtilization: 80
+    resources:
+      requests:
+        cpu: 200m
+        memory: 384Mi
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+
+  auth:
+    enabled: true
+    name: chrono-auth-service
+    image: i-ayush-singh/chrono-auth-service:latest
+    port: 8084
+    replicas: 1
+    minReplicas: 1
+    maxReplicas: 4
+    cpuTargetUtilization: 70
+    memoryTargetUtilization: 80
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 600m
+        memory: 768Mi
+
+  scheduler:
+    enabled: true
+    name: chrono-scheduler-service
+    image: i-ayush-singh/chrono-scheduler-service:latest
+    port: 8082
+    replicas: 1
+    minReplicas: 1
+    maxReplicas: 4
+    cpuTargetUtilization: 70
+    memoryTargetUtilization: 80
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 600m
+        memory: 768Mi
+
+  executor:
+    enabled: true
+    name: chrono-executor-service
+    image: i-ayush-singh/chrono-executor-service:latest
+    port: 8083
+    replicas: 1
+    minReplicas: 1
+    maxReplicas: 6
+    cpuTargetUtilization: 70
+    memoryTargetUtilization: 80
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 800m
+        memory: 768Mi
+
+  gateway:
+    enabled: true
+    name: chrono-api-gateway
+    image: i-ayush-singh/chrono-api-gateway:latest
+    port: 8080
+    replicas: 1
+    minReplicas: 2
+    maxReplicas: 8
+    cpuTargetUtilization: 70
+    memoryTargetUtilization: 80
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 768Mi

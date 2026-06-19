@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "chronoflow.fullname" . }}-config
+  labels:
+    {{- include "chronoflow.labels" . | nindent 4 }}
+data:
+  DATABASE_URL: {{ printf "postgresql://%s:%s@postgres:5432/chronoflow" .Values.config.datasourceUsername .Values.secrets.datasourcePassword | quote }}
+  KAFKA_BROKERS: {{ .Values.config.kafkaBootstrapServers | quote }}
+  REDIS_URL: {{ printf "redis://%s:%s" .Values.config.redisHost .Values.config.redisPort | quote }}
+  OTLP_ENDPOINT: {{ .Values.global.tracingEndpoint | quote }}
+  AUTH_SERVICE_BASE_URL: {{ printf "http://%s:%v" .Values.services.auth.name .Values.services.auth.port | quote }}
+  JOB_SERVICE_BASE_URL: {{ printf "http://%s:%v" .Values.services.job.name .Values.services.job.port | quote }}
+  SCHEDULER_SERVICE_BASE_URL: {{ printf "http://%s:%v" .Values.services.scheduler.name .Values.services.scheduler.port | quote }}
+  EXECUTOR_SERVICE_BASE_URL: {{ printf "http://%s:%v" .Values.services.executor.name .Values.services.executor.port | quote }}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ .Values.config.kafkaBootstrapServers | quote }}
+  SPRING_DATA_REDIS_HOST: {{ .Values.config.redisHost | quote }}
+  SPRING_DATA_REDIS_PORT: {{ .Values.config.redisPort | quote }}
+  SPRING_DATASOURCE_URL: {{ .Values.config.datasourceUrl | quote }}
+  SPRING_DATASOURCE_USERNAME: {{ .Values.config.datasourceUsername | quote }}
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: {{ .Values.global.tracingEndpoint | quote }}

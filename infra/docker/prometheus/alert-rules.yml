@@ -1,0 +1,31 @@
+groups:
+  - name: chronoflow-platform-alerts
+    rules:
+      - alert: HighGateway5xxRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="chrono-api-gateway",status=~"5.."}[5m]))
+            /
+          clamp_min(sum(rate(http_server_requests_seconds_count{job="chrono-api-gateway"}[5m])), 0.001)
+            > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: chrono-api-gateway
+        annotations:
+          summary: "Gateway 5xx rate is above 5%"
+          description: "Check gateway logs and downstream service health."
+
+      - alert: HighExecutorFailureRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="chrono-executor-service",status=~"5.."}[5m]))
+            /
+          clamp_min(sum(rate(http_server_requests_seconds_count{job="chrono-executor-service"}[5m])), 0.001)
+            > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: chrono-executor-service
+        annotations:
+          summary: "Executor failure rate is above 5%"
+          description: "Check webhook targets, retry backlog, and DLQ growth."
+

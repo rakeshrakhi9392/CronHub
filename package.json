@@ -1,0 +1,22 @@
+{
+  "name": "chronoflow",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:job": "npm run dev -w @chronoflow/job-service",
+    "dev:auth": "npm run dev -w @chronoflow/auth-service",
+    "dev:gateway": "npm run dev -w @chronoflow/api-gateway",
+    "dev:scheduler": "npm run dev -w @chronoflow/scheduler-service",
+    "dev:executor": "npm run dev -w @chronoflow/executor-service",
+    "dev:mobile": "npm run start -w @chronoflow/mobile",
+    "lint": "npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

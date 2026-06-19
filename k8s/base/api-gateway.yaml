@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chrono-api-gateway
+  namespace: chronoflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chrono-api-gateway
+  template:
+    metadata:
+      labels:
+        app: chrono-api-gateway
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: chrono-api-gateway
+          image: i-ayush-singh/chrono-api-gateway:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "768Mi"
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: APP_SECURITY_AUTH_SERVICE_BASE_URL
+              value: "http://chrono-auth-service:8084"
+            - name: SPRING_DATA_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: chronoflow-config
+                  key: SPRING_DATA_REDIS_HOST
+            - name: SPRING_DATA_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: chronoflow-config
+                  key: SPRING_DATA_REDIS_PORT
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: chronoflow-config
+                  key: SPRING_KAFKA_BOOTSTRAP_SERVERS
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: chronoflow-config
+                  key: MANAGEMENT_OTLP_TRACING_ENDPOINT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chrono-api-gateway
+  namespace: chronoflow
+spec:
+  selector:
+    app: chrono-api-gateway
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: chrono-api-gateway
+  namespace: chronoflow
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: chrono-api-gateway
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chrono-api-gateway
+  namespace: chronoflow
+spec:
+  rules:
+    - host: chronoflow.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: chrono-api-gateway
+                port:
+                  number: 8080

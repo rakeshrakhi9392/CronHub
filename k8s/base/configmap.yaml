@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chronoflow-config
+  namespace: chronoflow
+data:
+  DATABASE_URL: "postgresql://chronoflow:chronoflow@postgres:5432/chronoflow"
+  KAFKA_BROKERS: "kafka:9092"
+  REDIS_URL: "redis://redis:6379"
+  OTLP_ENDPOINT: "http://otel-collector:4318/v1/traces"
+  AUTH_SERVICE_BASE_URL: "http://chrono-auth-service:8084"
+  JOB_SERVICE_BASE_URL: "http://chrono-job-service:8081"
+  SCHEDULER_SERVICE_BASE_URL: "http://chrono-scheduler-service:8082"
+  EXECUTOR_SERVICE_BASE_URL: "http://chrono-executor-service:8083"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  SPRING_DATA_REDIS_HOST: "redis"
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/chronoflow"
+  SPRING_DATASOURCE_USERNAME: "chronoflow"
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: "http://otel-collector:4318/v1/traces"
